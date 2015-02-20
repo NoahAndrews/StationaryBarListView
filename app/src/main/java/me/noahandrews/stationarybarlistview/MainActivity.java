@@ -7,10 +7,12 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewPropertyAnimator;
 
 import com.github.ksoichiro.android.observablescrollview.ObservableListView;
 import com.github.ksoichiro.android.observablescrollview.ObservableScrollViewCallbacks;
 import com.github.ksoichiro.android.observablescrollview.ScrollState;
+import com.github.ksoichiro.android.observablescrollview.ScrollUtils;
 
 
 public class MainActivity extends ActionBarActivity implements ObservableScrollViewCallbacks {
@@ -43,6 +45,9 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
                     mBaseTranslationY = scrollY;
                 }
             }
+            float headerTranslationY = ScrollUtils.getFloat(-(scrollY - mBaseTranslationY), -toolbarHeight, 0);
+            mHeaderView.animate().cancel();
+            mHeaderView.setTranslationY(headerTranslationY);
         }
     }
 
@@ -55,8 +60,55 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
     public void onUpOrCancelMotionEvent(ScrollState scrollState){
         mBaseTranslationY = 0;
 
+        //Fragment fragment = getCurrentFr
+
         int toolbarHeight = mToolbarView.getHeight();
         final ObservableListView listView = (ObservableListView) findViewById(R.id.scroll);
+        if(listView == null){
+            return;
+        }
+        int scrollY = listView.getCurrentScrollY();
+        if(scrollState == ScrollState.DOWN){
+            showToolbar();
+        } else if(scrollState == ScrollState.UP){
+            if(toolbarHeight <= scrollY ){
+                hideToolbar();
+            }
+            else {
+                showToolbar();
+            }
+        } else {
+            //Even if onScrollChanged occurs without scrollY changing, toolbar should be adjusted
+            if(!toolbarIsShown() && !toolbarIsHidden()){
+                //This triggers when the toolbar is between states.
+                hideToolbar(); //This should be tested both ways.
+            }
+        }
+    }
+
+    private boolean toolbarIsShown(){
+        return mHeaderView.getTranslationY() == 0;
+    }
+
+    private boolean toolbarIsHidden(){
+        return mHeaderView.getTranslationY() == -mToolbarView.getHeight();
+    }
+
+    private void showToolbar(){
+        float headerTranslationY = mHeaderView.getTranslationY();
+        if(headerTranslationY != 0){
+            mHeaderView.animate().cancel();
+            mHeaderView.animate().translationY(0).setDuration(200).start();
+        }
+    }
+
+    private void hideToolbar(){
+        float headerTranslationY = mHeaderView.getTranslationY();
+        int toolbarHeight = mToolbarView.getHeight();
+        if(headerTranslationY != -toolbarHeight){
+            mHeaderView.animate().cancel();
+            mHeaderView.animate().translationY(-toolbarHeight).setDuration(200).start();
+        }
     }
 
     @Override
