@@ -4,6 +4,7 @@ import android.support.v4.view.ViewCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,6 +22,7 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
     private View mToolbarView;
     private View mToolbar2View;
     private int mBaseTranslationY;
+    String TAG = "SCROLLING";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +35,19 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
         ViewCompat.setElevation(mHeaderView,getResources().getDimension(R.dimen.toolbar_elevation));
         mToolbarView = findViewById(R.id.toolbar);
         mToolbar2View = findViewById(R.id.toolbar2);
+        //hideToolbar();
+
+        String resultHidden = toolbarIsHidden() ? "hidden" : "shown";
+        Log.d(TAG, "Using toolbarIsHidden, he toolbar is " + resultHidden);
+
+        String resultShown = toolbarIsShown() ? "shown" : "hidden";
+        Log.d(TAG, "Using toolbarIsShown, he toolbar is " + resultShown);
+
+        Log.d(TAG, "TranslationY is " + String.valueOf(mHeaderView.getTranslationY()));
+
+        Log.d(TAG,"mToolbarView.getHeight()* -1 is " + String.valueOf(mToolbarView.getHeight()* -1));
+        Log.d(TAG,"mToolbarView.getHeight() is " + String.valueOf(mToolbarView.getHeight()));
+        Log.d(TAG,"mToolbarView.getMeasuredHeight() is " + String.valueOf(mToolbarView.getMeasuredHeight()));
     }
 
     @Override
@@ -91,7 +106,13 @@ public class MainActivity extends ActionBarActivity implements ObservableScrollV
     }
 
     private boolean toolbarIsHidden(){
-        return mHeaderView.getTranslationY() == -mToolbarView.getHeight();
+        if(mHeaderView.getTranslationY() == mToolbarView.getHeight()* -1){
+            return true;
+        }
+        else{
+            return false;
+        }
+        //return mHeaderView.getTranslationY() == -mToolbarView.getHeight();
     }
 
     private void showToolbar(){
